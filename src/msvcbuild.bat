@@ -20,8 +20,15 @@
 @set LJLIB=lib /nologo /nodefaultlib
 @set DASMDIR=..\dynasm
 @set DASM=%DASMDIR%\dynasm.lua
-@set LJDLLNAME=lua51.dll
-@set LJLIBNAME=lua51.lib
+@set LJBINPATH=..\bin\
+@if defined LJTARGETARCH (
+  @set LJBINPATH=%LJBINPATH%%LJTARGETARCH%\
+)
+@if not exist %LJBINPATH% (
+  @mkdir %LJBINPATH%
+)
+@set LJDLLNAME=%LJBINPATH%lua51.dll
+@set LJLIBNAME=%LJBINPATH%lua51.lib
 @set ALL_LIB=lib_base.c lib_math.c lib_bit.c lib_string.c lib_table.c lib_io.c lib_os.c lib_package.c lib_debug.c lib_jit.c lib_ffi.c
 
 %LJCOMPILE% host\minilua.c
@@ -92,10 +99,10 @@ if exist %LJDLLNAME%.manifest^
 
 %LJCOMPILE% luajit.c
 @if errorlevel 1 goto :BAD
-%LJLINK% /out:luajit.exe luajit.obj %LJLIBNAME%
+%LJLINK% /out:%LJBINPATH%luajit.exe luajit.obj %LJLIBNAME%
 @if errorlevel 1 goto :BAD
-if exist luajit.exe.manifest^
-  %LJMT% -manifest luajit.exe.manifest -outputresource:luajit.exe
+if exist %LJBINPATH%luajit.exe.manifest^
+  %LJMT% -manifest %LJBINPATH%luajit.exe.manifest -outputresource:%LJBINPATH%luajit.exe
 
 @del *.obj *.manifest minilua.exe buildvm.exe
 @echo.
